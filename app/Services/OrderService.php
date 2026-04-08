@@ -75,7 +75,7 @@ class OrderService
 
                 'status' => 'pending',
                 'payment_method' => $data['payment_method'],
-                'payment_status' => 'pending',
+                'payment_status' => 'unpaid',
 
                 'subtotal' => $subtotal,
                 'shipping_cost' => $shippingCost,

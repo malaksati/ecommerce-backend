@@ -12,7 +12,7 @@ class ProductStoreRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return $this->user()->isAdmin();
     }
 
     /**
@@ -24,18 +24,30 @@ class ProductStoreRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'sale_price' => 'nullable|numeric',
-            'stock' => 'required|integer',
+            'price'      => 'required|numeric|min:0',
+            'sale_price' => 'nullable|numeric|min:0|lt:price',
+            'stock' => 'required|integer|min:0',
 
-            'sku' => 'nullable|string',
+            'sku' => 'nullable|string|unique:products,sku,' . $this->route('product'),
             'description' => 'nullable|string',
 
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
 
             'category_id' => 'required|exists:categories,id',
-            'images.*' => 'image|max:2048',
+            'images'   => 'nullable|array|max:5',       // max 5 images
+            'images.*' => 'image|mimes:jpeg,png,webp|max:2048',
+        ];
+    }
+    public function messages(): array
+    {
+        return [
+            'category_id.exists'  => 'Selected category does not exist',
+            'sale_price.lt'       => 'Sale price must be less than the regular price',
+            'images.max'          => 'You can upload a maximum of 5 images',
+            'images.*.mimes'      => 'Images must be jpeg, png, or webp',
+            'images.*.max'        => 'Each image must not exceed 2MB',
+            'sku.unique'          => 'This SKU is already used by another product',
         ];
     }
 }

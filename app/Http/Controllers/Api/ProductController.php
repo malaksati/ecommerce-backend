@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductStoreRequest;
+use App\Http\Resources\ProductResource;
 use App\Services\ImageService;
 
 class ProductController extends Controller
@@ -42,24 +43,26 @@ class ProductController extends Controller
 
         // 🔽 Sorting
         if ($request->sort_by) {
-            $query->orderBy($request->sort_by, $request->sort_dir ?? 'asc');
+            $allowedSorts = ['price', 'name', 'created_at', 'stock'];
+            if (in_array($request->sort_by, $allowedSorts)) {
+                $allowedDirs = ['asc', 'desc'];
+                $dir = in_array($request->sort_dir, $allowedDirs) ? $request->sort_dir : 'asc';
+                $query->orderBy($request->sort_by, $dir);
+            }
         } else {
             $query->latest();
         }
 
         $products = $query->paginate(10);
 
-        return response()->json($products);
+        return ProductResource::collection($products);
     }
 
     // 🔹 GET /products/{slug}
     public function show(Product $product)
     {
-        $product = Product::with(['category', 'images'])
-            ->where('slug', $product->slug)
-            ->firstOrFail();
-
-        return response()->json($product);
+        $product->load(['category', 'images']);
+        return new ProductResource($product);
     }
 
     // 🔹 POST /products (Admin)
@@ -73,8 +76,8 @@ class ProductController extends Controller
                 $path = $imageService->uploadProductImage($file);
 
                 $product->images()->create([
-                    'url' => $path,
-                    'is_primary' => $index === 0, // first image primary
+                    'image_url' => $path,  // ✅
+                    'is_primary' => $index === 0,
                 ]);
             }
         }
@@ -87,7 +90,7 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
 
-        $validated = $request->validate();
+        $validated = $request->validated();
 
         if (isset($validated['name'])) {
             $validated['slug'] = Str::slug($validated['name']);

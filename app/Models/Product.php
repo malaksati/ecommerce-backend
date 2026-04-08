@@ -80,7 +80,7 @@ class Product extends Model
             'slug' => ['source' => 'name']  // auto generates from name
         ];
     }
-    public function getRouteKeyName()
+    public function getRouteKeyName(): string
     {
         return 'slug';
     }

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Encoders\AutoEncoder;
 use Intervention\Image\ImageManager;
 
 class ImageService
@@ -34,11 +35,8 @@ class ImageService
             $manager = new ImageManager(Driver::class);
 
             $image = $manager->decodePath($file->getRealPath())
-                ->resize(800, 800, function ($constraint) {
-                    $constraint->aspectRatio();
-                    $constraint->upsize();
-                })
-                ->encodeUsingFileExtension($extension, 80); // Quality 80%
+                ->scaleDown(800, 800)  // respects aspect ratio, never upscales
+                ->encode(new AutoEncoder(quality: 80));
 
             // Define storage path
             $path = "products/{$filename}";

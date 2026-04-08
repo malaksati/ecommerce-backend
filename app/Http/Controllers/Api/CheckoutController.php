@@ -3,33 +3,26 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
+use App\Http\Requests\CheckoutRequest;
+use App\Http\Resources\OrderResource;
 use App\Services\OrderService;
 
 class CheckoutController extends Controller
 {
     public function __construct(private OrderService $orderService) {}
 
-    public function checkout(Request $request)
+    public function checkout(CheckoutRequest $request)
     {
-        $data = $request->validate([
-            'full_name' => 'required|string',
-            'phone' => 'required|string',
-            'street' => 'required|string',
-            'city' => 'required|string',
-            'country' => 'required|string',
-            'postal_code' => 'nullable|string',
-            'payment_method' => 'required|in:cod,card'
-        ]);
-
         try {
             $order = $this->orderService->checkout(
                 $request->user(),
-                $data
+                $request->validated()   // 👈 clean, already validated
             );
 
-            return response()->json($order, 201);
+            return response()->json([
+                'message' => 'Order placed successfully',
+                'order'   => new OrderResource($order),
+            ], 201);
 
         } catch (\Exception $e) {
             return response()->json([

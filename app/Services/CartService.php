@@ -15,7 +15,7 @@ class CartService
             ->where('user_id', $user->id)
             ->get();
 
-        $total = $items->sum(fn ($item) => $item->subtotal);
+        $total = $items->sum(fn($item) => $item->subtotal);
 
         return [
             'items' => $items,
@@ -56,7 +56,7 @@ class CartService
                 ]);
             }
 
-            return $cartItem;
+            return $cartItem->load('product.images');
         });
     }
 
@@ -66,7 +66,8 @@ class CartService
         return DB::transaction(function () use ($user, $cartItemId, $qty) {
 
             $cartItem = CartItem::where('user_id', $user->id)
-                ->findOrFail($cartItemId);
+                ->where('id', $cartItemId)
+                ->firstOrFail();
 
             $product = $cartItem->product;
 
@@ -86,7 +87,7 @@ class CartService
 
             $cartItem->update(['quantity' => $qty]);
 
-            return $cartItem;
+            return $cartItem->load('product.images');
         });
     }
 
