@@ -11,20 +11,23 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $orders = Order::with('user')
-            ->when($request->status, fn($q) => $q->where('status', $request->status))
+        $orders = Order::with('items.product')
+            ->where('user_id', $request->user()->id)
             ->latest()
-            ->paginate(15);
+            ->paginate(10);
 
         return OrderResource::collection($orders);
     }
-    public function show($id)
+
+    public function show(Request $request, $id)
     {
-        $order = Order::with(['items.product', 'user'])
+        $order = Order::with('items.product')
+            ->where('user_id', $request->user()->id)
             ->findOrFail($id);
 
         return new OrderResource($order);
     }
+
     public function updateStatus(Request $request, $id)
     {
         $order = Order::findOrFail($id);

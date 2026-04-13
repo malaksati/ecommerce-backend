@@ -19,7 +19,9 @@ Route::prefix('auth')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me',      [AuthController::class, 'me']);
-
+    Route::post('/auth/profile',    [AuthController::class, 'updateProfile']); 
+    
+    Route::get('/products/grouped', [ProductController::class, 'grouped']);
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/products/{slug}', [ProductController::class, 'show']);
 
@@ -30,6 +32,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/cart', [CartItemController::class, 'clear']);
 
     Route::post('/checkout', [CheckoutController::class, 'checkout']);
+    Route::get('/orders',     [OrderController::class, 'index']);
+    Route::get('/orders/{id}', [OrderController::class, 'show']);
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {

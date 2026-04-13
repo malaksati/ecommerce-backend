@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductStoreRequest;
 use App\Http\Resources\ProductResource;
+use App\Models\Category;
 use App\Services\ImageService;
 
 class ProductController extends Controller
@@ -58,10 +59,26 @@ class ProductController extends Controller
         return ProductResource::collection($products);
     }
 
-    // 🔹 GET /products/{slug}
-    public function show(Product $product)
+    public function grouped()
     {
-        $product->load(['category', 'images']);
+        $categories = Category::with(['products' => function ($query) {
+            $query->where('is_active', true)
+                ->with('images')
+                ->orderBy('name', 'asc');  // alphabetic order
+        }])
+            ->whereHas('products', fn($q) => $q->where('is_active', true))
+            ->orderBy('name', 'asc')  // categories alphabetic too
+            ->get();
+
+        return response()->json($categories);
+    }
+    // 🔹 GET /products/{slug}
+    public function show($slug)
+    {
+        $product = Product::with(['category', 'images'])
+            ->where('slug', $slug)
+            ->firstOrFail();
+
         return new ProductResource($product);
     }
 

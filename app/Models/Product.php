@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Cviebrock\EloquentSluggable\Sluggable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -55,14 +56,18 @@ class Product extends Model
     }
 
     // ---- Helpers ----
-    public function getCurrentPriceAttribute(): float
+    protected function currentPrice(): Attribute
     {
-        return $this->sale_price ?? $this->price;
+        return Attribute::make(
+            get: fn() => $this->sale_price ?? $this->price,
+        );
     }
 
-    public function getIsOnSaleAttribute(): bool
+    protected function isOnSale(): Attribute
     {
-        return !is_null($this->sale_price) && $this->sale_price < $this->price;
+        return Attribute::make(
+            get: fn() => !is_null($this->sale_price) && $this->sale_price < $this->price,
+        );
     }
 
     public function isInStock(): bool

@@ -8,6 +8,7 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -88,6 +89,36 @@ class AuthController extends Controller
     {
         return response()->json([
             'user' => new UserResource(auth()->user()),
+        ]);
+    }
+
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $data = $request->validate([
+            'name'         => 'sometimes|string|max:255',
+            'phone'        => 'sometimes|nullable|string|max:20',
+            'current_password' => 'required_with:password|string',
+            'password'         => 'sometimes|string|min:8|confirmed',
+        ]);
+
+        // verify current password before changing
+        if (isset($data['password'])) {
+            if (!Hash::check($data['current_password'], $user->password)) {
+                return response()->json([
+                    'message' => 'Current password is incorrect'
+                ], 422);
+            }
+            $data['password'] = Hash::make($data['password']);
+        }
+
+        unset($data['current_password']);
+        $user->update($data);
+
+        return response()->json([
+            'message' => 'Profile updated successfully',
+            'user'    => new UserResource($user),
         ]);
     }
 }
