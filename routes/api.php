@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Admin\OrderController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\CartItemController;
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\CategoryFilterController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\ProductController;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/products/grouped', [ProductController::class, 'grouped']);
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/products/{slug}', [ProductController::class, 'show']);
+
+    Route::get('/filtercategories', [CategoryFilterController::class, 'index']);
 
     Route::get('/cart', [CartItemController::class, 'index']);
     Route::post('/cart', [CartItemController::class, 'store']);

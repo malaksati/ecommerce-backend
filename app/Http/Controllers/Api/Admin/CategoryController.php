@@ -11,7 +11,7 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        return CategoryResource::collection(Category::with('children')->paginate(20));
+        return CategoryResource::collection(Category::with('children')->paginate(50));
     }
     public function show(Category $category)
     {

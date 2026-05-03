@@ -25,7 +25,10 @@ class ProductController extends Controller
 
         // 📂 Filter by category
         if ($request->category_id) {
-            $query->where('category_id', $request->category_id);
+            $query->whereHas('category', function ($q) use ($request) {
+                $q->where('id', $request->category_id)
+                    ->orWhere('parent_id', $request->category_id);
+            });
         }
 
         // 💰 Price range
@@ -54,7 +57,7 @@ class ProductController extends Controller
             $query->latest();
         }
 
-        $products = $query->paginate(10);
+        $products = $query->paginate(1000);
 
         return ProductResource::collection($products);
     }

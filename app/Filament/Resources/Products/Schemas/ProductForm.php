@@ -49,6 +49,9 @@ class ProductForm
                         ->schema([
                             FileUpload::make('image_url')
                                 ->image()
+                                ->disk('public')           
+                                ->visibility('public')     
+                                ->directory('products')
                                 ->required(),
 
                             Toggle::make('is_primary')
