@@ -11,7 +11,7 @@ class CartService
     // 🧾 Get Cart
     public function getCart($user)
     {
-        $items = CartItem::with(['product.primaryImage'])
+        $items = CartItem::with(['product.images'])
             ->where('user_id', $user->id)
             ->get();
 
